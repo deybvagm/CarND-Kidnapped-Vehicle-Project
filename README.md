@@ -1,8 +1,6 @@
 # Overview
 This repository contains all the code needed to complete the final project for the Localization course in Udacity's Self-Driving Car Nanodegree.
 
-#### Submission
-All you will need to submit is your `src` directory. You should probably do a `git pull` before submitting to verify that your project passes the most up-to-date version of the grading code (there are some parameters in `src/main.cpp` which govern the requirements on accuracy and run time).
 
 ## Project Introduction
 Your robot has been kidnapped and transported to a new location! Luckily it has a map of this location, a (noisy) GPS estimate of its initial location, and lots of (noisy) sensor and control data.
@@ -28,11 +26,6 @@ Alternatively some scripts have been included to streamline this process, these 
 2. ./build.sh
 3. ./run.sh
 
-Tips for setting up your environment can be found [here](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/f758c44c-5e40-4e01-93b5-1a82aa4e044f/concepts/23d376c7-0195-4276-bdf0-e02f1f3c665d)
-
-Note that the programs that need to be written to accomplish the project are src/particle_filter.cpp, and particle_filter.h
-
-The program main.cpp has already been filled out, but feel free to modify it.
 
 Here is the main protocol that main.cpp uses for uWebSocketIO in communicating with the simulator.
 
@@ -82,11 +75,6 @@ OUTPUT: values provided by the c++ program to the simulator
 ["best_particle_sense_y"] <= list of sensed y positions
 
 
-Your job is to build out the methods in `particle_filter.cpp` until the simulator output says:
-
-```
-Success! Your particle filter passed!
-```
 
 # Implementing the Particle Filter
 The directory structure of this repository is as follows:
@@ -112,7 +100,7 @@ root
     |   particle_filter.h
 ```
 
-The only file you should modify is `particle_filter.cpp` in the `src` directory. The file contains the scaffolding of a `ParticleFilter` class and some associated methods. Read through the code, the comments, and the header file `particle_filter.h` to get a sense for what this code is expected to do.
+The file that contains the implementation of a particle filter is `particle_filter.cpp` in the `src` directory. The file contains the scaffolding of a `ParticleFilter` class and some associated methods. Read through the code, the comments, and the header file `particle_filter.h` to get a sense for what this code is doing.
 
 If you are interested, take a look at `src/main.cpp` as well. This file contains the code that will actually be running your particle filter and calling the associated methods.
 
@@ -130,8 +118,6 @@ You can find the inputs to the particle filter in the `data` directory.
 > * Map data provided by 3D Mapping Solutions GmbH.
 
 ## Success Criteria
-If your particle filter passes the current grading code in the simulator (you can make sure you have the current version at any time by doing a `git pull`), then you should pass!
-
 The things the grading code is looking for are:
 
 
@@ -139,5 +125,26 @@ The things the grading code is looking for are:
 
 2. **Performance**: your particle filter should complete execution within the time of 100 seconds.
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+
+# General process for the particle filter
+
+Here is how the particle filter is implemented:
+
+- Particles initialization: in this step, in function `init`, the number of particles are defined and each particle is initialized with the following information:
+    - Random x position according to a normal distribution with mean equals to the simulated x value from GPS, and a given standard deviation
+    - Random y position according to a normal distribution with mean equals to the simulated y value from GPS, and a given standard deviation
+    - Random heading angle theta according to a normal distribution with mean equal to the car's estimate for heading and a given standard deviation.
+    -An initial weight of 1.
+    
+- Particles prediction step: In this step in function `prediction`, the prediction about the location(x coord, y coord and theta angle) is calculated for each particle based on the control measurement provided by the car and the previous particle state:
+    - Time elapsed from the previous measurement
+    - Velocity from the previous time step
+    - Yaw rate from previous time step
+    - Previous x, y and theta values for the particle
+    
+ - Particles update step: In this step, instead of modifying the particle's position directly, the most representative particles are selected according to their weights. Thus, particles with higher weights are good estimates of the car position. The process to calculate the weight for each particle is implemented in function `updateWeights` and is defined as follows:
+    - Car observations are converted from car to map coordinates
+    - Only consider landmarks within the sensor range
+    - For each observation, find and associate the closest landmark
+    - Calculate the weight for each particle multiplying the probabilities of its observations (associated to closest landmarks)
+    - Select the most relevant particles as the representation of the car's position. This is done by resampling particles according to the weight of each particle 

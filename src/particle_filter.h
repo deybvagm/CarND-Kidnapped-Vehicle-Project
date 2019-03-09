@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include "helper_functions.h"
+#include "map.h"
 
 struct Particle {
   int id;
@@ -60,11 +61,11 @@ class ParticleFilter {
   /**
    * dataAssociation Finds which observations correspond to which landmarks 
    *   (likely by using a nearest-neighbors data association).
-   * @param predicted Vector of predicted landmark observations
-   * @param observations Vector of landmark observations
    */
-  void dataAssociation(std::vector<LandmarkObs> predicted, 
-                       std::vector<LandmarkObs>& observations);
+  Map::single_landmark_s dataAssociation(std::vector<int> &associations,
+                       double transformedXobservation,
+                       double transformedYobservation,
+                       const std::vector<Map::single_landmark_s> &landmarksInRange);
   
   /**
    * updateWeights Updates the weights for each particle based on the likelihood
@@ -108,6 +109,9 @@ class ParticleFilter {
   std::string getAssociations(Particle best);
   std::string getSenseCoord(Particle best, std::string coord);
 
+  std::vector<Map::single_landmark_s> getLandmarksWithinRange(double sensor_range, const Map &map_landmarks,
+                                                              Particle &particle);
+
   // Set of current particles
   std::vector<Particle> particles;
 
@@ -119,7 +123,8 @@ class ParticleFilter {
   bool is_initialized;
   
   // Vector of weights of all particles
-  std::vector<double> weights; 
+  std::vector<double> weights;
+
 };
 
 #endif  // PARTICLE_FILTER_H_
